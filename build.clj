@@ -11,6 +11,23 @@
 (defn clean [_]
       (b/delete {:path "target"}))
 
+(defn compile-java [_]
+      (b/javac {:src-dirs ["src"]
+                :class-dir class-dir
+                :basis basis}))
+
+(defn- copy-clj-sources []
+       (let [src-dir (java.io.File. "src")
+             target-dir (java.io.File. class-dir)]
+            (when (.exists src-dir)
+                  (doseq [^java.io.File f (file-seq src-dir)
+                          :when (and (.isFile f) (.endsWith (.getName f) ".clj"))]
+                         (let [rel-path (-> (.toPath src-dir) (.relativize (.toPath f)))
+                               dest (java.io.File. target-dir (.toString rel-path))]
+                              (.mkdirs (.getParentFile dest))
+                              (java.nio.file.Files/copy (.toPath f) (.toPath dest)
+                                                        (make-array java.nio.file.CopyOption 0)))))))
+
 
 (defn jar [_]
       (clean nil)
@@ -22,20 +39,9 @@
                     :scm {:url "https://github.com/topkzre/krro-curve-bezier2d"
                           :connection "scm:git:git://github.com/topkzre/krro-curve-bezier2d.git"
                           :developerConnection "scm:git:ssh://git@github.com:topkzre/krro-curve-bezier2d.git"}})
-      (b/copy-dir {:src-dirs ["src" "resources"] :target-dir class-dir})
+      (compile-java nil)
+      (copy-clj-sources)
       (b/jar {:class-dir class-dir
               :jar-file jar-file})
       (println "Jar created:" jar-file))
 
-(defn uberjar [_]
-      (clean nil)
-      (b/compile-clj {:basis basis
-                      :src-dirs ["src"]
-                      :class-dir class-dir})
-      (b/uber {:class-dir class-dir
-               :uber-file uber-file
-               :basis basis})
-      (println "Uberjar created:" uber-file))
-
-(defn test-all [_]
-      (b/process {:command-args ["clojure" "-M:test"]}))

@@ -10,8 +10,8 @@
     <version>0.1.0</version>
 
     <name>krro-ui-javafx</name>
-    <description>JavaFX UI renderer for Krrō</description>
-    <url>https://github.com/topkzre/krro-ui-javafx</url>
+    <description>Bezier2d curve lib for Krrō</description>
+    <url>https://github.com/huixiangchen0314/krro-curve-bezier2d</url>
 
     <dependencies>
         <dependency>

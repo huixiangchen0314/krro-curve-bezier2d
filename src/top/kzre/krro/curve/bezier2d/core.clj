@@ -53,7 +53,7 @@
 ;; 核心 API
 ;; ═══════════════════════════════════════════════════════
 
-(defn eval
+(defn evaluate
   "在参数 t 处求值，返回点 {:x :y}。"
   [curve-edn t]
   (let [c (CurvePool/borrowCurve)]
