@@ -1,6 +1,7 @@
 (ns top.kzre.krro.curve.bezier2d.core
   "Bézier2D 的纯 Clojure 封装。所有函数接收/返回 EDN 数据，
    内部通过 CurvePool 借用 Java Curve 对象执行计算，用完即还。"
+  (:refer-clojure :exclude [reverse])
   (:import (java.util ArrayList Collection)
            (top.kzre.curve.bezier2d AABB ArcLengthTable Bezier2D ClosestPointResult ControlPoint Curve Pair)
            (top.kzre.krro.curve.bezier2d CurvePool)))
