@@ -69,9 +69,24 @@
   (let [c (edn->curve curve-edn)]
     (Bezier2D/curvature c (double t))))
 
-(defn aabb [curve-edn]
-  (let [c (edn->curve curve-edn)]
-    (aabb->edn (Bezier2D/aabb c))))
+(defn aabb
+  "计算曲线的包围盒。
+   单参数时返回整条曲线的 AABB。
+   多参数时返回这些控制点相邻段的 AABB 并集。"
+  ([curve-edn]
+   (let [c (edn->curve curve-edn)]
+     (aabb->edn (Bezier2D/aabb c))))
+  ([curve-edn & idxs]
+   (let [c (edn->curve curve-edn)]
+     (aabb->edn
+       (reduce (fn [acc idx]
+                 (let [box (Bezier2D/aabb c (int idx))]
+                   (if acc
+                     (.merge box acc)
+                     box)))
+               nil
+               idxs)))))
+
 
 (defn split [curve-edn t]
   (let [c (edn->curve curve-edn)
