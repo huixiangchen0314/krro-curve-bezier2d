@@ -27,6 +27,12 @@
                     :dx2 (.getDx2 p) :dy2 (.getDy2 p)
                     :g1 (.isG1 p)})
                  (.getPoints c))})
+(defn edn->point [p]
+  (ControlPoint.
+    (double (:x p)) (double (:y p))
+    (double (:dx1 p)) (double (:dy1 p))
+    (double (:dx2 p)) (double (:dy2 p))
+    (boolean (:g1 p))))
 
 (defn pair->edn [^Pair p]
   {:x (.getX p) :y (.getY p)})
@@ -87,6 +93,19 @@
                nil
                idxs)))))
 
+(defn merge-aabb
+  "合并多个 AABB map，返回合并后的 AABB map，若所有输入为 nil 则返回 nil。"
+  [& aabbs]
+  (let [valid (filter some? aabbs)]
+    (when (seq valid)
+      (reduce (fn [acc aabb]
+                {:min-x (min (:min-x acc) (:min-x aabb))
+                 :min-y (min (:min-y acc) (:min-y aabb))
+                 :max-x (max (:max-x acc) (:max-x aabb))
+                 :max-y (max (:max-y acc) (:max-y aabb))})
+              (first valid)
+              (rest valid)))))
+
 
 (defn split [curve-edn t]
   (let [c (edn->curve curve-edn)
@@ -102,9 +121,24 @@
     (Bezier2D/divide c (int idx) left right)
     [(curve->edn left) (curve->edn right)]))
 
-(defn translate [curve-edn dx dy]
-  (let [c (edn->curve curve-edn)]
-    (curve->edn (Bezier2D/translate c (double dx) (double dy)))))
+(defn translate
+  "平移曲线。
+   单参数形式：整体平移整条曲线。
+   多参数形式：平移指定索引的控制点（不影响其他点及其手柄）。"
+  ([curve-edn dx dy]
+   (let [c (edn->curve curve-edn)]
+     (curve->edn (Bezier2D/translate c (double dx) (double dy)))))
+  ([curve-edn dx dy & idxs]
+   (if (empty? idxs)
+     curve-edn
+     (let [points (get-in curve-edn [:points])
+           idx-set (set idxs)
+           new-points (map-indexed (fn [idx p]
+                                     (if (idx-set idx)
+                                       (assoc p :x (+ (:x p) dx) :y (+ (:y p) dy))
+                                       p))
+                                   points)]
+       (assoc curve-edn :points new-points)))))
 
 (defn scale [curve-edn sx sy cx cy]
   (let [c (edn->curve curve-edn)]
@@ -122,6 +156,7 @@
   (let [c (edn->curve curve-edn)]
     (Bezier2D/insertPoint c (double t))
     (curve->edn c)))
+
 
 (defn delete-point [curve-edn idx]
   (let [c (edn->curve curve-edn)]
