@@ -12,8 +12,10 @@
 (s/def ::dy1 number?)
 (s/def ::dx2 number?)
 (s/def ::dy2 number?)
-(s/def ::g1 boolean?)
-(s/def ::control-point (s/merge ::point (s/keys :req-un [::dx1 ::dy1 ::dx2 ::dy2 ::g1])))
+
+(s/def ::continuity #(or (nil? %)
+                         #{:none :g1 :c1}))
+(s/def ::control-point (s/merge ::point (s/keys :req-un [::dx1 ::dy1 ::dx2 ::dy2 ::continuity])))
 
 ;; ── 曲线（路径） ───────────────────────────────────
 (s/def ::closed boolean?)

@@ -39,7 +39,7 @@
                     :scm {:url "https://github.com/topkzre/krro-curve-bezier2d"
                           :connection "scm:git:git://github.com/topkzre/krro-curve-bezier2d.git"
                           :developerConnection "scm:git:ssh://git@github.com:topkzre/krro-curve-bezier2d.git"}})
-      (compile-java nil)
+      ;(compile-java nil)
       (copy-clj-sources)
       (b/jar {:class-dir class-dir
               :jar-file jar-file})
