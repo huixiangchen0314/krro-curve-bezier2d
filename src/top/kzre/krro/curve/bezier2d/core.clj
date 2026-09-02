@@ -3,7 +3,7 @@
    内部直接构造 Java Curve 对象，无需池化。"
   (:refer-clojure :exclude [reverse])
   (:import (java.util ArrayList Collection)
-           (top.kzre.curve.bezier2d AABB ArcLengthTable Bezier2D ClosestPointResult ControlPoint Curve Pair)))
+           (top.kzre.curve.bezier2d AABB ArcLengthTable Bezier2D ClosestPointResult ControlPoint Curve Pair Segments)))
 
 ;; ── EDN ↔ Java 转换 ──────────────────────────────────
 
@@ -92,6 +92,19 @@
                      box)))
                nil
                idxs)))))
+
+(defn seg-aabb
+  [curve-edn & idxs]
+  (let [^Curve c (edn->curve curve-edn)]
+    (aabb->edn
+      (reduce (fn [acc idx]
+                (let [seg (.getSegment c idx)
+                      box (Segments/aabb seg)]
+                  (if acc
+                    (.merge box acc)
+                    box)))
+              nil
+              idxs))))
 
 (defn merge-aabb
   "合并多个 AABB map，返回合并后的 AABB map，若所有输入为 nil 则返回 nil。"
